@@ -1,0 +1,3 @@
+/home/tomasbm07/Desktop/UC/3ºano/Computação Gráfica/untitled/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/tomasbm07/Desktop/UC/3ºano/Computação Gráfica/untitled/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/tomasbm07/Desktop/UC/3ºano/Computação Gráfica/untitled/cmake-build-debug/CMakeFiles/untitled.dir
