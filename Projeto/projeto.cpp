@@ -185,9 +185,8 @@ GLint blackPlasticCoef = 0.25 *128;
 
 
 //---------------------------------------------------- AMBIENTE - fixa
-GLint   Dia = 1;     //:::   'D'  
-GLfloat intensidadeDia = 0.3;
-GLfloat luzGlobalCorAmb[4] = { intensidadeDia, intensidadeDia,intensidadeDia, 1.0 };   // 
+GLfloat intensidadeDia = 0.2;
+GLfloat luzGlobalCorAmb[4] = { intensidadeDia, intensidadeDia,intensidadeDia, 1 };   // 
 
 //Luz
 GLint   ligaTeto = 1;		 //:::   'T'  
@@ -195,19 +194,22 @@ GLfloat intensidadeT = 0.3;  //:::   'I'
 GLfloat   luzR = 1;		 	 //:::   'R'  
 GLfloat   luzG = 1;			 //:::   'G'  
 GLfloat   luzB = 1;			 //:::   'B'  
-GLfloat localPos[4] = { 1.0, 4.0, 0.0, 1.0 };
+GLfloat localPos[4] = { 1, 1.0, 0.0, 0 };
 GLfloat localCorAmb[4] = { 0.2, 0.2, 0.2, 0.0 };
 GLfloat localCorDif[4] = { luzR, luzG, luzB, 1.0 };
 GLfloat localCorEsp[4] = { luzR, luzG, luzB, 1.0 };
 
-GLfloat Pos1[] = { 1, 0, 0, 0 /*0 -> direcional / 1 -> pontual*/};   // Foco 1
-GLfloat	aberturaFoco = 5.0;
+GLfloat Pos1[] = {6, 0, 1, 1};   // Foco 1
+GLfloat	aberturaFoco = 25;
+
+
+GLint dim = 64;
 
 //-----------------------------------------------
 void init_texturas() {
     int width, height, nrChannels;
     unsigned char *data; //"black_plastic.png"
-    const char* texture_name[] = {"black_plastic.png", "red_plastic.png"};
+    const char* texture_name[] = {"black_plastic.png", "red_plastic.png", "colorida.bmp"};
 
     for (int i = 0; i < 2; i++) {
         glGenTextures(1, &textures_list[i]);
@@ -258,13 +260,15 @@ void init_lights(void) {
 
 
 	//===== FOCO 1
-	GLfloat Foco_direccao[] = { 0, 2, 0, 0 };	
-	GLfloat Foco1_cor[] = { 1, 1, 1, 1 };	//Cor da luz 1
+	GLfloat Foco_direccao[] = { 0, 0, -1, 0 };	//��� -Z
+	GLfloat Foco1_cor[] = { 0, 0,  1, 1 };	//��� Cor da luz 1
+	//GLfloat Foco2_cor[] = { 1, 0,  0, 1 };	//��� Cor da luz 2
 	GLfloat Foco_ak = 1.0;
 	GLfloat Foco_al = 0.05f;
 	GLfloat Foco_aq = 0.0f;
 	GLfloat Foco_Expon = 2.0;		// Foco, SPOT_Exponent
 
+	//�����������������������������������������������Foco Esquerda
 	glLightfv(GL_LIGHT1, GL_POSITION, Pos1);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, Foco1_cor);
 	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, Foco_ak);
@@ -305,19 +309,21 @@ void inicializa(void){
 
 	init_texturas();
 
+	init_lights();
+
 	glEnable(GL_DEPTH_TEST);	//Profundidade
 	glShadeModel(GL_SMOOTH);	//Interpolacao de cores	
 
 	glVertexPointer(3, GL_FLOAT, 0, vertices); //VertexArray
 	glEnableClientState(GL_VERTEX_ARRAY);
 
-	//glVertexPointer(3, GL_FLOAT, 0, normais); //VertexArray
-	//glEnableClientState(GL_NORMAL_ARRAY);
+	glNormalPointer(3, GL_FLOAT, normais); //Normal Array
+	glEnableClientState(GL_NORMAL_ARRAY);
 
 	glColorPointer( 3, GL_FLOAT, 0, vertexColors );
     glEnableClientState( GL_COLOR_ARRAY );
 
-	glTexCoordPointer(2, GL_FLOAT, 0, texturas_cubo); // Texture array
+	glTexCoordPointer(2, GL_FLOAT, 0, texturas_cubo); // Texture Array
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	// Posição inicial do observador
@@ -496,10 +502,32 @@ void mainDraw() {
 		glPopMatrix();
 	glPopMatrix();
 
-	// glPushMatrix();
-	// glTranslatef(2, 0, 0);
-	// glDrawElements(GL_POLYGON, 4, GL_UNSIGNED_INT, baixo);
-	// glPopMatrix();
+	glPushMatrix();
+	
+	float med_dim = (float)dim / 2;
+
+	glTranslatef(5, 0, 0);
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textures_list[1]);
+
+	glBegin(GL_QUADS);
+	for (int i = 0; i < dim; i++)
+		for (int j = 0; j < dim; j++) {
+			glTexCoord2f((float)j / dim, (float)i / dim);
+			glVertex3d((float)j / med_dim, (float)i / med_dim, 0);
+			glTexCoord2f((float)(j + 1) / dim, (float)i / dim);
+			glVertex3d((float)(j + 1) / med_dim, (float)i / med_dim, 0);
+			glTexCoord2f((float)(j + 1) / dim, (float)(i + 1) / dim);
+			glVertex3d((float)(j + 1) / med_dim, (float)(i + 1) / med_dim, 0);
+			glTexCoord2f((float)j / dim, (float)(i + 1) / dim);
+			glVertex3d((float)j / med_dim, (float)(i + 1) / med_dim, 0);
+		}
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+
+	glPopMatrix();
 
 	glutPostRedisplay();
 
@@ -509,7 +537,7 @@ void mainDraw() {
 void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	init_lights();
+	//init_lights();
 
 	//smal window
 	glMatrixMode(GL_PROJECTION);
@@ -622,10 +650,35 @@ void keyboard(unsigned char key, int x, int y) {
 			obsLook[1] = 1;
 			obsLook[2] = 0;
 			break;
+		case 'g':
+		case 'G':
+			dim = 2 * dim;
+			if (dim > 256) dim = 256;
+			glutPostRedisplay();
+			break;
+		case 'f':
+		case 'F':
+			dim = 0.5 * dim;
+			if (dim < 1) dim = 1;
+			glutPostRedisplay();
+			break;
+		case 'h':
+		case 'H':
+			aberturaFoco = aberturaFoco + 3;
+			if (aberturaFoco > 70)
+				aberturaFoco = 70;
+			break;
+		case 'n':
+		case 'N':
+			aberturaFoco = aberturaFoco - 3;
+			if (aberturaFoco < 3)
+				aberturaFoco = 3;
+			break;
 
         case 27:
             exit(0);
             break;
+	
     }
 
 	glutPostRedisplay();
@@ -634,44 +687,44 @@ void keyboard(unsigned char key, int x, int y) {
 
 // Setas para controlar o observador
 void teclasNotAscii(int key, int x, int y) {
-	if (key == GLUT_KEY_UP)
-		obsPos[1] = (obsPos[1] + 0.1);
-	if (key == GLUT_KEY_DOWN)
-		obsPos[1] = (obsPos[1] - 0.1);
+	// if (key == GLUT_KEY_UP)
+	// 	obsPos[1] = (obsPos[1] + 0.1);
+	// if (key == GLUT_KEY_DOWN)
+	// 	obsPos[1] = (obsPos[1] - 0.1);
 
-	if (obsPos[1] > yC)
-		obsPos[1] = yC;
-	if (obsPos[1] < -yC)
-		obsPos[1] = -yC;
+	// if (obsPos[1] > yC)
+	// 	obsPos[1] = yC;
+	// if (obsPos[1] < -yC)
+	// 	obsPos[1] = -yC;
 
-	if (key == GLUT_KEY_LEFT)
-		aVisao = (aVisao + 0.1);
-	if (key == GLUT_KEY_RIGHT)
-		aVisao = (aVisao - 0.1);
+	// if (key == GLUT_KEY_LEFT)
+	// 	aVisao = (aVisao + 0.1);
+	// if (key == GLUT_KEY_RIGHT)
+	// 	aVisao = (aVisao - 0.1);
 
-	obsPos[0] = rVisao * cos(aVisao);
-	obsPos[2] = rVisao * sin(aVisao);
+	// obsPos[0] = rVisao * cos(aVisao);
+	// obsPos[2] = rVisao * sin(aVisao);
 	
 
-	///
-	// if (key == GLUT_KEY_UP){
-	// 	obsPos[1] += 0.1;
-	// 	obsLook[1] += 0.1;
-	// }
-	// if (key == GLUT_KEY_DOWN){
-	// 	obsPos[1] -= 0.1;
-	// 	obsLook[1] -= 0.1;
-	// }
+	
+	if (key == GLUT_KEY_UP){
+		obsPos[1] += 0.1;
+		obsLook[1] += 0.1;
+	}
+	if (key == GLUT_KEY_DOWN){
+		obsPos[1] -= 0.1;
+		obsLook[1] -= 0.1;
+	}
 
-	// if (key == GLUT_KEY_LEFT){
-	// 	obsPos[0] -= 0.1;
-	// 	obsLook[0] -= 0.1;
-	// }
+	if (key == GLUT_KEY_LEFT){
+		obsPos[0] -= 0.1;
+		obsLook[0] -= 0.1;
+	}
 
-	// if (key == GLUT_KEY_RIGHT){
-	// 	obsPos[0] += 0.1;
-	// 	obsLook[0] += 0.1;
-	// }
+	if (key == GLUT_KEY_RIGHT){
+		obsPos[0] += 0.1;
+		obsLook[0] += 0.1;
+	}
 
 	glutPostRedisplay();
 }
